@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Axle Weight Calculator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1em;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+    }
+    h2 {
+      font-size: 2em;
+      margin: 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 1em;
+      font-size: 1.5em;
+    }
+    input {
+      width: 100%;
+      padding: 0.6em;
+      font-size: 1.4em;
+      margin-top: 0.3em;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+    button {
+      padding: 0.6em 1em;
+      font-size: 1.5em;
+      background-color: var(--button-bg);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: var(--button-hover);
+    }
+    #themeToggle {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+    .section {
+      margin-top: 2em;
+      font-size: 1.3em;
+    }
+    .result {
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --input-bg: #ffffff;
+      --border-color: #ccc;
+      --button-bg: #007BFF;
+      --button-hover: #0056b3;
+    }
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #f0f0f0;
+      --input-bg: #1e1e1e;
+      --border-color: #555;
+      --button-bg: #1E88E5;
+      --button-hover: #1565C0;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Axle Weight Calculator</h2>
+    <button onclick="toggleMode()" id="themeToggle" aria-label="Toggle dark mode">🌞</button>
+  </div>
+  <div>
+    <label>Steer:
+      <input type="number" step="0.01" id="steer">
+    </label>
+    <label>Drive:
+      <input type="number" step="0.01" id="drive">
+    </label>
+    <label>Dolly:
+      <input type="number" step="0.01" id="dolly1">
+    </label>
+    <label>Tandem:
+      <input type="number" step="0.01" id="dolly2">
+    </label>
+    <button onclick="calculate()" style="width: 100%;">Calculate</button>
+  </div>
+  <div class="section" id="results"></div>
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+      const icon = document.getElementById('themeToggle');
+      icon.textContent = document.body.classList.contains('dark-mode') ? '🌙' : '🌞';
+    }
+
+    function calculate() {
+      let steer = parseFloat(document.getElementById('steer').value) || 0;
+      let drive = parseFloat(document.getElementById('drive').value) || 0;
+      let dolly1 = parseFloat(document.getElementById('dolly1').value) || 0;
+      let dolly2 = parseFloat(document.getElementById('dolly2').value) || 0;
+
+      const maxSteer = 6.5, maxDrive = 17, maxDolly = 17;
+
+      let steerExcess = steer - maxSteer;
+      let driveExcess = drive - maxDrive;
+      let dolly1Excess = dolly1 - maxDolly;
+      let dolly2Excess = dolly2 - maxDolly;
+
+      let cSteer = steer;
+      let cDrive = drive;
+      let cDolly1 = dolly1;
+      let cDolly2 = dolly2;
+
+      if (steerExcess > 0) {
+        cSteer = maxSteer;
+        cDrive += steerExcess;
+      }
+
+      if (cDrive > maxDrive) {
+        driveExcess = cDrive - maxDrive;
+        cDrive = maxDrive;
+        cSteer += driveExcess;
+      }
+
+      if (dolly1Excess > 0) {
+        cDolly1 = maxDolly;
+        cDolly2 += dolly1Excess;
+      }
+
+      if (cDolly2 > maxDolly) {
+        dolly2Excess = cDolly2 - maxDolly;
+        cDolly2 = maxDolly;
+        cDolly1 += dolly2Excess;
+      }
+
+      const truck = cSteer + cDrive;
+      const subtotal3 = truck + cDolly1;
+      const subtotal4 = subtotal3 + cDolly2;
+      const trailerTotal = cDolly1 + cDolly2;
+
+      document.getElementById('results').innerHTML = `
+        <div class="result">Corrected Weights:</div>
+        Steer: ${cSteer.toFixed(2)} t<br>
+        Drive: ${cDrive.toFixed(2)} t<br>
+        Dolly: ${cDolly1.toFixed(2)} t<br>
+        Tandem: ${cDolly2.toFixed(2)} t<br><br>
+
+        <div class="result">Running Totals:</div>
+        Steer: ${cSteer.toFixed(2)} t<br>
+        Truck: ${truck.toFixed(2)} t<br>
+        + Dolly: ${subtotal3.toFixed(2)} t<br>
+        Grand Total: ${subtotal4.toFixed(2)} t<br>
+        Trailer Total: ${trailerTotal.toFixed(2)} t<br>
+      `;
+    }
+  </script>
+</body>
+</html>
